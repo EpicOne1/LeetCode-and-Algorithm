@@ -4,7 +4,22 @@
 
 ## 快慢指针
 
+![image-20220527175032294](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220527175032294.png)
+
+
+
 ### [142. 环形链表 II](https://leetcode.cn/problems/linked-list-cycle-ii/)
+
+##### Hash Table
+
+```c++
+unordered_set<ListNode*> container;
+// find 
+container.find(curr) == container.end();
+
+// count
+container.count(curr) 
+```
 
 给定一个链表，有环把环的入口找出来，无环返回nullptr。
 
@@ -283,11 +298,101 @@ ListNode* swapPairs(ListNode* head) {
 
 ![image-20220527161958762](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220527161958762.png)
 
+```c++
+ListNode* swapPairs(ListNode* head) {
+    ListNode* prevHead = new ListNode();
+    prevHead->next = head;
+    
+    ListNode* temp = prevHead;
+    while(temp->next != nullptr && temp->next->next != nullptr) {
+        ListNode* node1 = temp->next;
+        ListNode* node2 = temp->next->next;
+        // change temp->node1->node2->next to temp->node2->node1->next
+        temp->next = node2;
+        node1->next = node2->next;
+        node2->next = node1;
+        
+        temp = node1;
+    }
+    
+    return prevHead->next;
+}
+```
+
+#### [83. 删除排序链表中的重复元素](https://leetcode.cn/problems/remove-duplicates-from-sorted-list/)
+
+Traversal 
+
+```c++
+ListNode* deleteDuplicates(ListNode* head) {
+    if (head == nullptr || head->next == nullptr) {
+        return head;
+    }
+    
+    ListNode* curr = head;
+    while(curr->next != nullptr) {
+        // curr->next->nextnext
+        if (curr->val == curr->next->val) {
+            ListNode* temp = curr->next;	// store for deletion
+            curr->next = curr->next->next;
+            delete temp;
+        }
+        else {
+            curr = curr->next;
+        }
+    }
+    
+    return head;
+}
+```
 
 
 
+#### [328. 奇偶链表](https://leetcode.cn/problems/odd-even-linked-list/)
 
+原始链表的头节点 head 也是奇数链表的头节点以及结果链表的头节点，head 的后一个节点是偶数链表的头节点。令 evenHead = head.next，则 evenHead 是偶数链表的头节点。
 
+![image-20220527184804837](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220527184804837.png)
+
+```c++
+ListNode* oddEvenList(ListNode* head) {
+    if (head == nullptr) {
+        return head;
+    }
+    
+    ListNode* oddHead = head;
+    ListNode* evenHead = head->next;
+    
+    ListNode* odd = oddHead;
+    ListNode* even = evenHead;
+    
+    while(even != nullptr && even->next != nullptr) {
+        odd->next = even->next;
+        odd = odd->next;
+        even->next = odd->next;	// odd is updated
+        even = even->next;
+    }
+    
+    // now odd is the last element of odd list
+    odd->next = evenHead;
+    
+    return oddHead;
+}
+```
+
+#### [19. 删除链表的倒数第 N 个结点](https://leetcode.cn/problems/remove-nth-node-from-end-of-list/)
+
+为了方便操作，应该取得被删节点之前的节点
+
+For example, $1 \to 2 \to 3 \to 4 \to \phi$ 
+
+say we need to delete 3, we need to know `prev_delete = 2`
+
+```c++
+ListNode* temp = prev_delete->next;	// store node need to delete
+prev_delete->next = prev_delete->next->next;
+delete temp;
+```
 
 
 
