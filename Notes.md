@@ -225,7 +225,7 @@ $1 \to 2 \to 3 \to \phi$
 
 $3 \to 2 \to 1 \to \phi$
 
-##### **递归**
+递归
 
 ![image-20220527154443613](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220527154443613.png)
 
@@ -246,7 +246,7 @@ ListNode* reverseList(ListNode* head) {
 }
 ```
 
-##### **遍历**
+遍历
 
 ![image-20220527155259534](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220527155259534.png)
 
@@ -272,9 +272,7 @@ ListNode* reverseList(ListNode* head) {
 
 #### [24. 两两交换链表中的节点](https://leetcode.cn/problems/swap-nodes-in-pairs/)
 
-
-
-##### 递归
+递归
 
 ```c++
 ListNode* swapPairs(ListNode* head) {
@@ -292,9 +290,7 @@ ListNode* swapPairs(ListNode* head) {
 }
 ```
 
-
-
-##### 迭代
+迭代
 
 ![image-20220527161958762](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220527161958762.png)
 
@@ -394,6 +390,39 @@ prev_delete->next = prev_delete->next->next;
 delete temp;
 ```
 
+**Method1**
+
+1. get size of linked list
+2. locate last Nth node's previous node
+
+![image-20220527205938260](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220527205938260.png)
+
+**Method2**
+
+Use fast and slow pointer to locate last Nth node's previous node
+
+由于我们需要找到倒数第 n 个节点，因此我们可以使用两个指针 first, second 同时对链表进行遍历，并且 first 比 second 超前 n 个节点。当 first 遍历到链表的末尾时，second 就恰好处于倒数第 n 个节点。为了使second在倒数第 n 个节点之前，我们可以让second从哑结点开始。
+
+![image-20220527210226191](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220527210226191.png)
+
+
+
+#### [148. 排序链表](https://leetcode.cn/problems/sort-list/)
+
+**Method1** 
+
+![image-20220529091630947](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220529091630947.png)
+
+```c++
+ListNode* sortList(ListNode* head) {
+    ListNode* fast = head;
+    ListNode* slow = head;
+    
+    while (fast != nullptr && fast->next != nullptr) {
+        
+    }
+}
+```
 
 
 
@@ -401,18 +430,322 @@ delete temp;
 
 
 
+## 树
+
+### 递归
+
+#### [104. 二叉树的最大深度](https://leetcode.cn/problems/maximum-depth-of-binary-tree/)
+
+depth(root) = 1 + max(depth(root.left) + depth(root.right))
+
+```c++
+int maxDepth(TreeNode* root) {
+    if (root == nullptr) {
+        return 0;
+    }
+    
+    return 1 + max(maxDepth(root->left), maxDepth(root->right));
+}
+```
+
+#### [110. 平衡二叉树](https://leetcode.cn/problems/balanced-binary-tree/)
+
+**自顶向下**
+
+```c++
+int height(TreeNode* root) {
+    if (!root) {
+        return 0;
+    }
+    else {
+        return 1 + max(height(root->left), height(root->right) );
+    }
+}
+
+bool isBalanced(TreeNode* root) {
+    if (!root) {
+        return true;
+    }        
+    else {
+        return abs(height(root->left) - height(root->right)) <= 1 && isBalanced(root->left) && isBalanced(root->right);
+    }
+}
+```
+
+**自底向上**
+
+![image-20220529111411955](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220529111411955.png)
+
+后续遍历：左右根
+
+```c++
+int height(TreeNode* root) {
+    if (root == nullptr) {
+        return 0;
+    }
+    
+    int leftHeight = height(root->left);
+    int rightHeight = height(root->right);
+    if (leftHeight == -1 || rightHeight == -1 || abs(leftHeight - rightHeight) > 1) {
+        return -1;
+    }
+    else {
+        return 1 + max(leftHeight, rightHeight);
+    }
+}
+
+bool isBalanced(TreeNode* root) {
+	return height(root) >= 0;
+}
+```
+
+#### [543. 二叉树的直径](https://leetcode.cn/problems/diameter-of-binary-tree/)
+
+一棵二叉树的直径长度是任意两个结点路径长度中的最大值。这条路径可能穿过也可能不穿过根结点。
+
+节点最大直径 = 左子树深度+右子树深度
+
+![image-20220529115133913](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220529115133913.png)
+
+```c++
+int diameter = -1;	// initial diameter as min
+
+int diameterOfBinaryTree(TreeNode* root) {
+    depth(root);
+    
+    return diameter;
+}
+
+int depth(TreeNode* root) {
+    if (root == nullptr) {
+        return 0;
+    }
+    
+    int leftDepth = depth(root->left);
+    int rightDepth = depth(root->right);
+    
+    diameter = max(diameter, leftDepth + rightDepth);	// update max diameter
+    
+    return 1 + max(leftDepth, rightDepth);	// return depth
+}
+```
+
+#### [437. 路径总和 III](https://leetcode.cn/problems/path-sum-iii/)
+
+![image-20220529155937396](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220529155937396.png)
+
+对于每个节点p：rootSum(p, val)
+
+而对于所有的节点：rootSum(root, targetSum) + pathSum(root->left, targetSum) + pathSum(root->right, targetSum)
+
+rootSum(root, targetSum): 对于root有多少种路径？递归左右子树得到
+
+pathSum(root->left, targetSum)：递归左子树，对于左子树都多少种路径？遍历所有节点
+
+总共有两次遍历
+
+```c++
+int rootSum(TreeNode* root, int targetSum) {
+    if (root == nullptr) {
+        return 0;
+    }
+    
+    int res = 0;
+    
+    if (root->val == targetSum) res++;
+    
+    res += rootSum(root->left, targetSum - root->val);
+    res += rootSum(root->right, targetSum - root->val);
+    
+    return res; 
+}
+
+int pathSum(TreeNode* root, int targetSum) {
+    if (root == nullptr) {
+        return 0;
+    }
+    
+    int res = rootSum(root, targetSum);
+    res += pathSum(root->left, targetSum);
+    res += pathSum(root->right, targetSum);
+    
+    return res;
+}
+```
+
+#### [101. 对称二叉树](https://leetcode.cn/problems/symmetric-tree/)
+
+两个子树是否**对称**或者**相等**：
+
+![image-20220529161832941](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220529161832941.png)
+
+DFS：
+
+```c++
+// check if two tree are mirror
+bool check(TreeNode* t1, TreeNode* t2) {
+    // both null tree
+    if (!t1 && !t2) {
+        return true;
+    }
+
+    // one tree is empty
+    if (!t1 || !t2) {
+        return false;
+    }
+
+    return (t1->val == t2->val) && check(t1->left, t2->right) && 
+            check(t1->right, t2->left);
+}
 
 
+bool isSymmetric(TreeNode* root) {
+    return check(root, root);
+}
+```
+
+BFS：
+
+```c++
+bool isSymmetric(TreeNode* root) {
+    std::queue<TreeNode*> q;
+    q.push(root);
+    q.push(root);
+
+    while (!q.empty()) {
+        TreeNode* t1 = q.front();
+        q.pop();
+        TreeNode* t2 = q.front();
+        q.pop();
+
+        if (!t1 && !t2) continue;    // both empty tree
+        if ((!t1 || !t2) || (t1->val != t2->val)) return false;   
+
+        // mirror pair
+        q.push(t1->left);
+        q.push(t2->right);
+
+        q.push(t1->right);
+        q.push(t2->left);
+
+    }
+
+    return true;
+}
+```
+
+### 层次遍历
+
+![image-20220529162725024](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220529162725024.png)
+
+#### [637. 二叉树的层平均值](https://leetcode.cn/problems/average-of-levels-in-binary-tree/)
+
+```c++
+vector<double> averageOfLevels(TreeNode* root) {
+    vector<double> res;
+    
+    if (root == nullptr) {
+        return res;
+    }
+
+    queue<TreeNode*> q;
+    q.push(root);
+
+    while (!q.empty()) {
+        int level_size = q.size();  // current level size
+        double sum = 0.0;
+
+        // pop up all current level's nodes and add next level's nodes
+        for (int i = 0; i < level_size; i++) {
+            TreeNode* node = q.front();
+            q.pop();
+            sum += node->val;
+
+            if (node->left) q.push(node->left);
+            if (node->right) q.push(node->right);
+        }
+
+        res.push_back(sum/level_size);
+
+    }
+
+    return res;
+}
+```
+
+### 前中后序遍历
+
+前：根左右
+
+中：左根右
+
+后：左右根
+
+```c++
+void preorder(TreeNode* root) {
+    visit(root);
+    preorder(root->left);
+    preorder(root->right);
+}
+
+void inorder(TreeNode* root) {
+    inorder(root->left);
+    visit(root);
+    inorder(root->right);
+}
+
+void postorder(TreeNode* root) {
+    postorder(root->left);
+    postorder(root->right);
+    visit(root);
+}
+```
+
+#### [105. 从前序与中序遍历序列构造二叉树](https://leetcode.cn/problems/construct-binary-tree-from-preorder-and-inorder-traversal/)
+
+![image-20220529165638529](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220529165638529.png)
+
+```c++
+unordered_map<int, int> index;  // {TreeNode->val, TreeNode->index}
+
+// build tree recursively based on preorder (not inorder!!!)
+TreeNode* buildTreeHelper(const vector<int>& preorder,const vector<int>& inorder, int preorder_left, int preorder_right, int inorder_left, int inorder_right ){
+    if (preorder_left > preorder_right) {
+        return nullptr;
+    }    
+
+    // find root index in preorder
+    int preorder_root = preorder_left;
+
+    // find root index in inorder
+    int inorder_root = index[preorder[preorder_root]];
+
+    // build root
+    TreeNode* root = new TreeNode(preorder[preorder_root]);
+
+    // size of left subtree
+    int size_left_subtree = inorder_root - inorder_left;
+
+    // build left subtree
+    root->left = buildTreeHelper(preorder, inorder, preorder_left + 1, preorder_left + size_left_subtree, inorder_left, inorder_root-1);
+
+    // build right subtree
+    root->right = buildTreeHelper(preorder, inorder, preorder_left + size_left_subtree + 1, preorder_right, inorder_root + 1, inorder_right);
+
+    return root;
+}
 
 
+TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+    int n = preorder.size();
+    // build hash map
+    for (int i = 0; i < n; i++){
+        index[inorder[i]] = i;
+    }
 
-
-
-
-
-
-
-
+    return buildTreeHelper(preorder, inorder, 0, n-1, 0, n-1);
+}
+```
 
 
 
