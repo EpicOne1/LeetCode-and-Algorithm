@@ -1,3 +1,5 @@
+
+
 ## 双指针
 
 
@@ -746,6 +748,271 @@ TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
     return buildTreeHelper(preorder, inorder, 0, n-1, 0, n-1);
 }
 ```
+
+
+
+## 图
+
+![img](https://em62weavv9.feishu.cn/space/api/box/stream/download/asynccode/?code=MDUyNTQzODlmNjcwNWJkYzExZjc0YTM4MDhkODA0ZmZfT2RaVWdMVWtUd2hsYm9aSTByazZoeDZKbFp6VUtkaHRfVG9rZW46Ym94Y25idnd2ajZYblJUVENISkpaRVZuekZiXzE2NTM4OTYzNzQ6MTY1Mzg5OTk3NF9WNA)
+
+![img](https://em62weavv9.feishu.cn/space/api/box/stream/download/asynccode/?code=YzljYTg4ZWU3MGMwYWE3Y2IyMmJiNjY2MjI3ZjI5YjNfVkpJTFE0MUJHZmxkN3lYUUxVTU1DU2FLYnVUN1N0TnVfVG9rZW46Ym94Y252STRhN3VNM0VybDRpZFpNS3RlZVdiXzE2NTM4OTY0MTE6MTY1MzkwMDAxMV9WNA)
+
+### Dijkstra
+
+Node has three states: 
+
+1. Open set: implemented in priority queue = <g(n), node n>, (visited but unexpanded, meaning that sucessors have not been explored yet). This is the list of pending tasks.
+2. Close set: visited and expanded, the node in close set has optimal cost. 
+3. Not in open set and close set: unvisited node (newly explored node).
+
+g(n) = accumulated cost from start state to node "n"
+
+Strategy: **expand node with least g(n)**
+
+```c++
+struct Node {
+    state;	// open list, close list, unvisited
+    parent;
+    g;	// distance to source
+}
+```
+
+```c++
+void Dijkstra(...) {
+    typedef pair<int, int> pi;	// <g(n), node index>
+    priority_queue<pi, vector<pi>, greater<pi>> OpenSet;
+    
+    // initialize
+    dist[source] = 0;	// source.g = 0;
+    dist[other_nodes] = inf;	// initial other nodes g as inf, g[n] = inf
+    vector<bool> CloseSet (Graph.size()); // store expanded node
+    
+    while (true) {
+        // no nodes to expand, return 
+        if (OpenSet.empty()) {
+            return;
+        }
+        // expand node with lowest g(n) from priority queue
+        auto [g, n] = OpenSet.top();
+        OpenSet.pop();
+        // mark node n as expanded
+        CloseSet[n] = true;
+        // if node n is goal state, return 
+        if (n == goal) {
+            return;
+        }
+        // for all neighbors "m" of node "n", m is n's neighbor
+        for (auto m:n) {
+            if (m.state == unvisited) {// g[m] == inf, new explore
+                g[m] = g[n] + C(n,m);	// C(n,m): cost from n to m
+                OpenSet.push(make_pair(g[m], m)); 	// add to OpenSet
+                // update node m
+                m.state = OpenSet;
+                m.parent = n;
+            }
+            if (m.state == OpenSet)	{ // update if path from n to m is better
+                if (g[m] > g[n] + C(n,m)) {
+                    g[m] = g[n] + C(n,m);
+                    m.parent = n;
+                }
+            }
+            if (m.state == CloseSet) {	// m is already optimal
+                continue;
+            }
+        }
+    }
+}
+```
+
+
+
+### A*
+
+Open set: implemented in priority queue = <f(n), node n>
+
+f(n) = g(n) + h(n)
+
+g(n) = accumulated cost from start state to node "n"
+
+h(n) = **estimated least cost** from node n to goal state
+
+Strategy: **expand node with least f(n) = g(n) + h(n)** (only different to Dijkstra)
+
+A key property is admissibility: an **admissible heuristic** is one that never overestimates the cost to reach a goal. (An admissible heuristic is therefore optimistic)
+
+h(n) <= h*(n)
+
+h*(n) = **true least cost** from node n to goal state
+
+
+
+
+
+**weight A***
+
+f(n) = a * g(n) + b * h(n)
+
+a = 0, b = 1: f(n) = h(n), greedy
+
+a = 1, b = 1: f(n) = g(n) + h(n), A*
+
+a = 1, b = 0: f(n) = g(n), Dijkstra
+
+```c++
+// node.h
+
+typedef GridNode* GridNodePtr;
+#define inf 1>>20
+
+struct GridNode {
+    int id;	// open set = 1, close set = -1, unvisited = 0
+    double gScore, fScore;
+    GridNodePtr cameFrome;	// parent
+    
+    std::multimap<double, GridNodePtr>::iterator nodeMapIt;	// iterator that points to its position in multimap
+   	
+    // initialization
+    GridNode() {
+        id = 0;
+        gScore = inf;
+        fScore = inf;
+        cameFrom = nullptr;
+    }
+};
+```
+
+```c++
+// Astar.cpp
+
+std::multimap<double, GridNodePtr> openSet;	// <fScore, GridNodePtr>
+
+double getHeu(GridNode* node1, GridNode* node2);	// get heuristic 
+
+openSet.clear();
+
+// put start node to open set
+startPtr->gScore = 0;
+startPtr->fScore = getHeu(startPtr, endPtr);
+startPtr->id = 1;
+startPtr->cameFrom = nullptr;
+startPtr->nodeMapIt = openSet.insert(make_pair(startPtr->fScore, startPtr));	// (fScore, Node)
+
+while(true) {
+    if (openSet.empty()) 
+        return;
+    
+    // remove node with lowest f(n)
+    currentPtr = openSet.begin()->second;
+    openSet.erase(openSet.begin());
+    // add to close set (expanded)
+    currentPtr->id = -1;	
+    
+    // if reach goal
+    if (currentPtr->index == goalIdx) 
+        return;
+    
+    // neighbors
+    for (auto neighborPtr : currentPtr->neighbors) {
+        // new visited
+        if (neighborPtr->id == 0) {
+            neighborPtr->gScore = currentPtr->gScore + edgeCost();
+            neighborPtr->fScore = neighborPtr->gScore + neighborPtr->hScore;
+            // add to open set
+            neighborPtr->id = 1;
+            neighborPtr->nodeMapIt = openSet.insert(make_pair(neighborPtr->fScore, neighborPtr));
+            neighborPtr->cameFrom = currentPtr;
+        }
+        
+        // in open set
+        if (neighborPtr->id == 1) {
+            if (neighborPtr->gScore > currentPtr->gScore + edgeCost()) {
+                neighborPtr->gScore = currentPtr->gScore + edgeCost();
+                neighborPtr->fScore = neighborPtr->gScore + neighborPtr->hScore;
+                neighborPtr->cameFrom = currentPtr;
+                // update open set
+                openSet.erase(neighborPtr->nodeMapIt);
+                neighborPtr->nodeMapIt = openSet.insert(make_pair(neighborPtr->fScore, neighborPtr));
+            }
+        }
+        
+        // in close set
+        if (neighborPtr->id == -1) {
+            continue;
+        }        
+    }        
+}
+```
+
+```c++
+// get_path.cpp
+vector<Vector3d> path;
+vector<GridNodePtr> gridPath;
+
+GridNodePtr ptr = terminatePtr;
+while(ptr){
+    gridPath.push_back(ptr);
+    ptr=ptr->cameFrom;
+}
+
+for (auto ptr : gridPath)
+    path.push_back(ptr->coord);
+
+reverse(path.begin(), path.end());
+```
+
+### Priority Queue Implementation
+
+**Method1** 
+
+`std::priority_queue`
+
+```c++
+template <class T, class Container = vector<T>,
+  class Compare = less<typename Container::value_type> > class priority_queue     
+```
+
+Default: first element is the greatest element 
+
+```c++
+// pair = <cost, vertex index>
+typedef pair<int,int> pi;
+
+priority_queue<pi, vector<pi>, greater<pi>> pq;	// use greater rather than less to achieve first is minimum
+
+pq.empty();
+pq.top();
+pq.pop();
+pq.push(make_pair(dist[m], m));
+
+```
+
+**Method2**
+
+`std::multimap`
+
+```c++
+template < class Key,                                     // multimap::key_type
+           class T,                                       // multimap::mapped_type
+           class Compare = less<Key>,                     // multimap::key_compare
+           class Alloc = allocator<pair<const Key,T> >    // multimap::allocator_type
+           > class multimap;
+```
+
+Default: first element is the element with minimum key 
+
+```c++
+std::multimap<double, GridNodePtr> openSet;	// <fScore, GridNodePtr>
+
+openSet.begin();	// return iterator points to first element
+GridNodePtr currentPtr = openSet.begin()->second;
+
+openSet.erase(openSet.begin());	// remove elements using according to iterator
+
+// return an iterator pointing to the newly inserted element in the multiset.
+neighborPtr->nodeMapIt = openSet.insert(make_pair(neighborPtr->fScore, neighborPtr));
+```
+
+
 
 
 
