@@ -212,14 +212,167 @@ int maxAreaOfIsland(vector<vector<int>>& grid) {
 
 ## 链表
 
-递归或者迭代
-
-经常使用哑结点
+#### 数据结构
 
 ```c++
-ListNode* prevHead = new ListNode();
-prevHead->next = head;
+// Definition for singly-linked list
+struct ListNode {
+     int val;
+     ListNode *next;
+     ListNode() : val(0), next(nullptr) {}
+     ListNode(int x) : val(x), next(nullptr) {}
+     ListNode(int x, ListNode *next) : val(x), next(next) {}
+};
 ```
+
+递归或者迭代
+
+经常使用哑结点 (**记得最后要删除**)
+
+```c++
+ListNode* dummyHead = new ListNode();
+dummyHead->next = head;
+```
+
+记得删除不需要的结点（释放内存）
+
+#### [203. 移除链表元素](https://leetcode.cn/problems/remove-linked-list-elements/)
+
+```c++
+ListNode* removeElements(ListNode* head, int val) {
+    if (head == nullptr) {
+        return head;
+    }
+
+    ListNode* dummyHead = new ListNode();
+    dummyHead->next = head;
+
+    ListNode* prev = dummyHead;
+
+    while (prev->next != nullptr) {
+        if (prev->next->val == val) {
+            ListNode* del = prev->next; // node need to delete
+            prev->next = del->next;
+            delete del;
+        }
+        else {
+            prev = prev->next;  // move to next node
+        }
+    }
+
+    // remember to delete dummy head as well
+    head = dummyHead->next;
+    delete dummyHead;
+
+    return head;
+}
+```
+
+
+
+
+
+```c++
+class MyLinkedList {
+public:
+    // singly linked list
+    struct LinkedNode {
+        int val;
+        LinkedNode* next;
+        LinkedNode(): val(0), next(nullptr) {}
+        LinkedNode(int v): val(v), next(nullptr) {}
+    };
+
+    MyLinkedList() {
+        dummyHead = new LinkedNode();
+        size = 0;
+    }
+    
+    int get(int index) {
+        if (index < 0 || index > (size - 1) ) return -1;
+    
+        LinkedNode* curr = dummyHead;
+        for (int i = 0; i <= index; i++) {
+            curr = curr->next;
+        }
+
+        return curr->val;
+    }
+    
+    // 在链表最前面插入一个节点，插入完成后，新插入的节点为链表的新的头结点
+    void addAtHead(int val) {
+        LinkedNode* newNode = new LinkedNode();
+        newNode->val = val;
+
+        newNode->next = dummyHead->next;
+        dummyHead->next = newNode;
+
+        size++;
+    }
+    
+    // 在链表最后面添加一个节点
+    void addAtTail(int val) {
+        LinkedNode* curr = dummyHead;
+        while (curr->next != nullptr) {
+            curr = curr->next;
+        }
+
+        LinkedNode* newNode = new LinkedNode(val);
+        newNode->next = curr->next;
+        curr->next = newNode;
+        size++;
+    }
+    
+    //在链表中的第 index 个节点之前添加值为 val  的节点。如果 index 等于链表的长度，则该节点将附加到链表的末尾。如果 index 大于链表长度，则不会插入节点。如果index小于0，则在头部插入节点。
+    void addAtIndex(int index, int val) {
+        if (index > size) {
+            return;
+        }
+        LinkedNode* newNode = new LinkedNode(val);
+        // find where to insert
+        LinkedNode* cur = dummyHead;
+        while(index > 0) {
+            cur = cur->next;
+            index--;
+        }
+        newNode->next = cur->next;
+        cur->next = newNode;
+        size++;
+    }
+    
+    //如果索引 index 有效，则删除链表中的第 index 个节点。
+    void deleteAtIndex(int index) {
+        if (index < 0 || index > (size - 1)) return;
+        // find's delete node's prev node
+        LinkedNode* prev = dummyHead;
+        while (index > 0) {
+            prev = prev->next;
+            index--;
+        }
+        LinkedNode* temp = prev->next;
+        prev->next = prev->next->next;
+        delete temp;
+        size--;
+    }
+
+    // need private members
+private:
+    LinkedNode* dummyHead;
+    int size;
+};
+
+/**
+ * Your MyLinkedList object will be instantiated and called as such:
+ * MyLinkedList* obj = new MyLinkedList();
+ * int param_1 = obj->get(index);
+ * obj->addAtHead(val);
+ * obj->addAtTail(val);
+ * obj->addAtIndex(index,val);
+ * obj->deleteAtIndex(index);
+ */
+```
+
+
 
 #### [206. 反转链表](https://leetcode.cn/problems/reverse-linked-list/)
 
@@ -406,6 +559,80 @@ Use fast and slow pointer to locate last Nth node's previous node
 由于我们需要找到倒数第 n 个节点，因此我们可以使用两个指针 first, second 同时对链表进行遍历，并且 first 比 second 超前 n 个节点。当 first 遍历到链表的末尾时，second 就恰好处于倒数第 n 个节点。为了使second在倒数第 n 个节点之前，我们可以让second从哑结点开始。
 
 ![image-20220527210226191](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220527210226191.png)
+
+#### [142. 环形链表 II](https://leetcode.cn/problems/linked-list-cycle-ii/)
+
+##### Hash Table
+
+```c++
+unordered_set<ListNode*> container;
+// find 
+container.find(curr) == container.end();
+
+// count
+container.count(curr) 
+```
+
+给定一个链表，有环把环的入口找出来，无环返回nullptr。
+
+**Method1**
+
+Traverse the linked list and store the address of node, if we meet node that is already stored, then this is the enter of cycle. Since the address is unique, we can use set to store.
+
+```c++
+ListNode* detectCycle(ListNode* head) {
+	unordered_set<ListNode*> address;
+    
+    ListNode* curr = head;
+    
+    while (curr != nullptr) {
+        // check if curr exists
+        if (address.find(curr) != address.end()) {
+            return curr;
+        }
+        // store curr
+        address.insert(curr);
+        curr = curr->next;
+    }
+    
+    return nullptr;
+}
+```
+
+**Method2**
+
+Fast and slow pointer start at the head of linked list.
+
+Fast pointer moves 2 steps and slow pointer moves 1 step each time. If there is cycle in linked list, fast and slow pointer will meet in cycle.
+
+当发现 slow 与 fast 相遇时，我们再额外使用一个指针 ptr。起始，它指向链表头部；随后，它和 slow 每次向后移动一个位置。最终，它们会在入环点相遇。
+
+```c++
+ListNode* detectCycle(ListNode* head) {
+    ListNode* fast = head;
+    ListNode* slow = head;
+    
+    while (fast != nullptr) {
+        if (fast->next == nullptr) {
+            return nullptr;
+        }
+        slow = slow->next;
+        fast = fast->next->next;
+        
+        // there is a cycle
+        if (fast == slow) {
+            ListNode* ptr = head;
+            while (ptr != slow) {
+                ptr = ptr->next;
+                slow = slow->next;             
+            }
+            return ptr; // or slow
+        }
+    }
+    
+    return nullptr;
+}
+```
 
 
 
