@@ -1,91 +1,5 @@
 
 
-## 双指针
-
-![image-20220606085100176](Notes.assets/image-20220606085100176.png)
-
-## 快慢指针
-
-![image-20220527175032294](Notes.assets/image-20220527175032294.png)
-
-
-
-### [142. 环形链表 II](https://leetcode.cn/problems/linked-list-cycle-ii/)
-
-##### Hash Table
-
-```c++
-unordered_set<ListNode*> container;
-// find 
-container.find(curr) == container.end();
-
-// count
-container.count(curr) 
-```
-
-给定一个链表，有环把环的入口找出来，无环返回nullptr。
-
-**Method1**
-
-Traverse the linked list and store the address of node, if we meet node that is already stored, then this is the enter of cycle. Since the address is unique, we can use set to store.
-
-```c++
-ListNode* detectCycle(ListNode* head) {
-	unordered_set<ListNode*> address;
-    
-    ListNode* curr = head;
-    
-    while (curr != nullptr) {
-        // check if curr exists
-        if (address.find(curr) != address.end()) {
-            return curr;
-        }
-        // store curr
-        address.insert(curr);
-        curr = curr->next;
-    }
-    
-    return nullptr;
-}
-```
-
-**Method2**
-
-Fast and slow pointer start at the head of linked list.
-
-Fast pointer moves 2 steps and slow pointer moves 1 step each time. If there is cycle in linked list, fast and slow pointer will meet in cycle.
-
-当发现 slow 与 fast 相遇时，我们再额外使用一个指针 ptr。起始，它指向链表头部；随后，它和 slow 每次向后移动一个位置。最终，它们会在入环点相遇。
-
-```c++
-ListNode* detectCycle(ListNode* head) {
-    ListNode* fast = head;
-    ListNode* slow = head;
-    
-    while (fast != nullptr) {
-        if (fast->next == nullptr) {
-            return nullptr;
-        }
-        slow = slow->next;
-        fast = fast->next->next;
-        
-        // there is a cycle
-        if (fast == slow) {
-            ListNode* ptr = head;
-            while (ptr != slow) {
-                ptr = ptr->next;
-                slow = slow->next;             
-            }
-            return ptr; // or slow
-        }
-    }
-    
-    return nullptr;
-}
-```
-
-
-
 ## 搜索算法（BFS，DFS）
 
 ### 邻居
@@ -584,6 +498,53 @@ Use fast and slow pointer to locate last Nth node's previous node
 
 ![image-20220527210226191](Notes.assets/image-20220527210226191.png)
 
+```c++
+ListNode* removeNthFromEnd(ListNode* head, int n) {
+    ListNode* dummyHead = new ListNode();
+    dummyHead->next = head;
+    ListNode* slow = dummyHead;
+    ListNode* fast = dummyHead;
+
+    // move fast n+1 steps
+    for (int i = 1; i <= n + 1; i++) {
+        fast = fast->next;
+    }
+
+    while (fast != nullptr) {
+        slow = slow->next;
+        fast = fast->next;
+    }
+
+    ListNode* del = slow->next;
+    slow->next = del->next;
+    delete del;
+
+    return dummyHead->next;
+}
+```
+
+
+
+#### [160. 相交链表](https://leetcode.cn/problems/intersection-of-two-linked-lists/)
+
+![image-20220606112933991](Notes.assets/image-20220606112933991.png)
+
+```c++
+
+```
+
+
+
+
+
+![image-20220606113003209](Notes.assets/image-20220606113003209.png)
+
+```c++
+	
+```
+
+
+
 #### [142. 环形链表 II](https://leetcode.cn/problems/linked-list-cycle-ii/)
 
 ##### Hash Table
@@ -631,15 +592,16 @@ Fast pointer moves 2 steps and slow pointer moves 1 step each time. If there is 
 
 当发现 slow 与 fast 相遇时，我们再额外使用一个指针 ptr。起始，它指向链表头部；随后，它和 slow 每次向后移动一个位置。最终，它们会在入环点相遇。
 
+![image-20220606113956120](Notes.assets/image-20220606113956120.png)
+
+
+
 ```c++
 ListNode* detectCycle(ListNode* head) {
     ListNode* fast = head;
     ListNode* slow = head;
     
-    while (fast != nullptr) {
-        if (fast->next == nullptr) {
-            return nullptr;
-        }
+    while (fast != nullptr && fast->next != nullptr) {
         slow = slow->next;
         fast = fast->next->next;
         
@@ -657,6 +619,12 @@ ListNode* detectCycle(ListNode* head) {
     return nullptr;
 }
 ```
+
+
+
+#### [147. 对链表进行插入排序](https://leetcode.cn/problems/insertion-sort-list/)
+
+
 
 
 
