@@ -150,6 +150,15 @@ dummyHead->next = head;
 
 记得删除不需要的结点（释放内存）
 
+删除节点的时候如果能取得删除节点的前一个节点会更加方便
+
+```c++
+// prev -> node (need to delete) -> next
+ListNode* node = prev->next;
+prev->next = node->next;
+delete node;
+```
+
 移动链表指针一定步数
 
 ```c++
@@ -162,7 +171,7 @@ for (int i = 1; i <= n + 1; i++) {
     fast = fast->next;
 }
 
-// n = 2, i <= 3, fast move 3 steps
+// n = 2, i <= 3, fast move n+1=3 steps
 // i = 1, fast = node1
 // i = 2, fast = node2
 // i = 3, fast = node3
@@ -646,6 +655,198 @@ ListNode* sortList(ListNode* head) {
 ```
 
 
+
+## 哈希
+
+#### [242. 有效的字母异位词](https://leetcode.cn/problems/valid-anagram/)
+
+Notice how to deal with index of each character
+
+```c++
+bool isAnagram(string s, string t) {
+    vector<int> record (26, 0);
+
+    // record char appears in string s
+    for (char c : s) {
+        record[c - 'a'] += 1;
+    }
+
+    for (char c : t) {
+        record[c - 'a'] -= 1;
+    }
+
+    for (auto num: record) {
+        if (num != 0) return false;
+    }
+
+    return true;
+}
+```
+
+#### [349. 两个数组的交集](https://leetcode.cn/problems/intersection-of-two-arrays/)
+
+
+
+![image-20220606160023260](Notes.assets/image-20220606160023260.png)
+
+Notice conversion between vector and unordered_set (two containers)
+
+```c++
+vector<int> intersection(vector<int>& nums1, vector<int>& nums2) {
+    unordered_set<int> store_nums1 (nums1.begin(), nums1.end());
+
+    unordered_set<int> res;
+    for (int num : nums2) {
+        // if num is already in nums1, add to common res
+        if (store_nums1.find(num) != store_nums1.end()) {
+            res.insert(num);
+        }
+    }
+
+    return vector<int> (res.begin(), res.end());
+}
+```
+
+#### [202. 快乐数](https://leetcode.cn/problems/happy-number/)
+
+题目中说了会 **无限循环**，那么也就是说**求和的过程中，sum会重复出现，这对解题很重要！**
+
+所以这道题目使用哈希法，来判断这个sum是否重复出现，如果重复了就是return false， 否则一直找到sum为1为止。
+
+判断sum是否重复出现就可以使用unordered_set。
+
+**还有一个难点就是求和的过程，如果对取数值各个位上的单数操作不熟悉的话，做这道题也会比较艰难。**
+
+```c++
+class Solution {
+public:
+    // n = 19, getSum(19) = 1^2 + 9^2 = 82
+    int getSum(int n) {
+        int sum = 0;
+        // 从低位到高位依次取
+        while (n > 0) {
+            int digit = n % 10;
+            sum += digit * digit;
+            n /= 10;
+        }
+        return sum;
+    }
+    
+    bool isHappy(int n) {
+		unordered_set<int> us;
+        while (true) {
+            int sum = getSum(n);
+            if (sum == 1) {
+                return true;
+            }
+            // 如果这个sum曾经出现过，说明已经陷入了无限循环了，立刻return false
+            if (us.find(sum) != us.end()) {
+                return false;
+            } 
+            else {
+                us.insert(sum);
+            }
+            n = sum;      
+        }
+    }
+};
+```
+
+#### [1. 两数之和](https://leetcode.cn/problems/two-sum/)
+
+```c++
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        std::unordered_map <int,int> map;	// {nums, index}
+        for(int i = 0; i < nums.size(); i++) {
+            auto iter = map.find(target - nums[i]);
+            if(iter != map.end()) {
+                return {iter->second, i};
+            }
+            map.insert(pair<int, int>(nums[i], i));
+            // or 
+            // map[nums[i]] = i;
+        }
+        return {};
+    }
+};
+```
+
+
+
+## 字符串
+
+#### [344. 反转字符串](https://leetcode.cn/problems/reverse-string/)
+
+Notice how to swap two char
+
+```c++
+class Solution {
+public:
+    void reverseString(vector<char>& s) {
+        int n = s.size();
+
+        for (int i = 0, j = n - 1; i < n / 2; i++, j--) {
+            // swap s[i], s[j]
+            swap(s[i], s[j]);
+            // char c = s[i];
+            // s[i] = s[j];
+            // s[j] = c;
+        }
+    }
+};
+```
+
+
+
+## 双指针
+
+#### [27. 移除元素](https://leetcode.cn/problems/remove-element/)
+
+**Brute-Force:**
+
+```c++
+// 时间复杂度：O(n^2)
+// 空间复杂度：O(1)
+class Solution {
+public:
+    int removeElement(vector<int>& nums, int val) {
+        int size = nums.size();
+        for (int i = 0; i < size; i++) {
+            if (nums[i] == val) { // 发现需要移除的元素，就将数组集体向前移动一位
+                for (int j = i + 1; j < size; j++) {
+                    nums[j - 1] = nums[j];
+                }
+                i--; // 因为下标i以后的数值都向前移动了一位，所以i也向前移动一位
+                size--; // 此时数组的大小-1
+            }
+        }
+        return size;
+
+    }
+};
+```
+
+双指针法（快慢指针法）： **通过一个快指针和慢指针在一个for循环下完成两个for循环的工作。**
+
+```c++
+class Solution {
+public:
+    int removeElement(vector<int>& nums, int val) {
+        int slowIndex = 0;
+        for (int fastIndex = 0; fastIndex < nums.size(); fastIndex++) {
+            if (val != nums[fastIndex]) {
+                nums[slowIndex] = nums[fastIndex];
+                slowIndex++;
+            }
+        }
+        return slowIndex;
+    }
+};
+```
+
+#### [剑指 Offer 05. 替换空格](https://leetcode.cn/problems/ti-huan-kong-ge-lcof/)
 
 
 
