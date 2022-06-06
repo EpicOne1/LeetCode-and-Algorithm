@@ -2,11 +2,11 @@
 
 ## 双指针
 
-
+![image-20220606085100176](Notes.assets/image-20220606085100176.png)
 
 ## 快慢指针
 
-![image-20220527175032294](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220527175032294.png)
+![image-20220527175032294](Notes.assets/image-20220527175032294.png)
 
 
 
@@ -382,7 +382,7 @@ $3 \to 2 \to 1 \to \phi$
 
 递归
 
-![image-20220527154443613](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220527154443613.png)
+![image-20220527154443613](Notes.assets/image-20220527154443613.png)
 
 注意如何获取$n_{k+1} = n_k.next$ 的，不需要通过遍历 $reverseList(n_{k+1})$ 
 
@@ -403,7 +403,9 @@ ListNode* reverseList(ListNode* head) {
 
 遍历
 
-![image-20220527155259534](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220527155259534.png)
+![image-20220527155259534](Notes.assets/image-20220527155259534.png)
+
+![image-20220606083453023](Notes.assets/image-20220606083453023.png)
 
 注意，这里的prev并不是哑结点，而只是用来储存curr的前一个节点而已
 
@@ -447,7 +449,7 @@ ListNode* swapPairs(ListNode* head) {
 
 迭代
 
-![image-20220527161958762](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220527161958762.png)
+![image-20220527161958762](Notes.assets/image-20220527161958762.png)
 
 ```c++
 ListNode* swapPairs(ListNode* head) {
@@ -503,7 +505,7 @@ ListNode* deleteDuplicates(ListNode* head) {
 
 原始链表的头节点 head 也是奇数链表的头节点以及结果链表的头节点，head 的后一个节点是偶数链表的头节点。令 evenHead = head.next，则 evenHead 是偶数链表的头节点。
 
-![image-20220527184804837](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220527184804837.png)
+![image-20220527184804837](Notes.assets/image-20220527184804837.png)
 
 ```c++
 ListNode* oddEvenList(ListNode* head) {
@@ -550,7 +552,7 @@ delete temp;
 1. get size of linked list
 2. locate last Nth node's previous node
 
-![image-20220527205938260](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220527205938260.png)
+![image-20220527205938260](Notes.assets/image-20220527205938260.png)
 
 **Method2**
 
@@ -558,7 +560,7 @@ Use fast and slow pointer to locate last Nth node's previous node
 
 由于我们需要找到倒数第 n 个节点，因此我们可以使用两个指针 first, second 同时对链表进行遍历，并且 first 比 second 超前 n 个节点。当 first 遍历到链表的末尾时，second 就恰好处于倒数第 n 个节点。为了使second在倒数第 n 个节点之前，我们可以让second从哑结点开始。
 
-![image-20220527210226191](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220527210226191.png)
+![image-20220527210226191](Notes.assets/image-20220527210226191.png)
 
 #### [142. 环形链表 II](https://leetcode.cn/problems/linked-list-cycle-ii/)
 
@@ -640,7 +642,7 @@ ListNode* detectCycle(ListNode* head) {
 
 **Method1** 
 
-![image-20220529091630947](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220529091630947.png)
+![image-20220529091630947](Notes.assets/image-20220529091630947.png)
 
 ```c++
 ListNode* sortList(ListNode* head) {
@@ -703,7 +705,7 @@ bool isBalanced(TreeNode* root) {
 
 **自底向上**
 
-![image-20220529111411955](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220529111411955.png)
+![image-20220529111411955](Notes.assets/image-20220529111411955.png)
 
 后续遍历：左右根
 
@@ -734,7 +736,7 @@ bool isBalanced(TreeNode* root) {
 
 节点最大直径 = 左子树深度+右子树深度
 
-![image-20220529115133913](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220529115133913.png)
+![image-20220529115133913](Notes.assets/image-20220529115133913.png)
 
 ```c++
 int diameter = -1;	// initial diameter as min
@@ -761,7 +763,7 @@ int depth(TreeNode* root) {
 
 #### [437. 路径总和 III](https://leetcode.cn/problems/path-sum-iii/)
 
-![image-20220529155937396](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220529155937396.png)
+![image-20220529155937396](Notes.assets/image-20220529155937396.png)
 
 对于每个节点p：rootSum(p, val)
 
@@ -806,7 +808,7 @@ int pathSum(TreeNode* root, int targetSum) {
 
 两个子树是否**对称**或者**相等**：
 
-![image-20220529161832941](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220529161832941.png)
+![image-20220529161832941](Notes.assets/image-20220529161832941.png)
 
 DFS：
 
@@ -865,7 +867,7 @@ bool isSymmetric(TreeNode* root) {
 
 ### 层次遍历
 
-![image-20220529162725024](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220529162725024.png)
+![image-20220529162725024](Notes.assets/image-20220529162725024.png)
 
 #### [637. 二叉树的层平均值](https://leetcode.cn/problems/average-of-levels-in-binary-tree/)
 
@@ -932,7 +934,7 @@ void postorder(TreeNode* root) {
 
 #### [105. 从前序与中序遍历序列构造二叉树](https://leetcode.cn/problems/construct-binary-tree-from-preorder-and-inorder-traversal/)
 
-![image-20220529165638529](/Users/jingyanglin/Library/Application Support/typora-user-images/image-20220529165638529.png)
+![image-20220529165638529](Notes.assets/image-20220529165638529.png)
 
 ```c++
 unordered_map<int, int> index;  // {TreeNode->val, TreeNode->index}
