@@ -4,4 +4,5 @@ A note for LeetCode based on LeetCode101. Thanks to people who are willing to wr
 
 Focus on pointer, linked list, tree, graph, search algorithm (bfs, dfs) and dynamic programming.
 
-Gogo
+GOGOGOGO
+
