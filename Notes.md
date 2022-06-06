@@ -236,6 +236,26 @@ dummyHead->next = head;
 
 记得删除不需要的结点（释放内存）
 
+移动链表指针一定步数
+
+```c++
+// dummyHead -> node1 -> node2 ->node3 -> null
+//      fast 
+
+ListNode* fast = dummyHead;
+// move fast n+1 steps
+for (int i = 1; i <= n + 1; i++) {
+    fast = fast->next;
+}
+
+// n = 2, i <= 3, fast move 3 steps
+// i = 1, fast = node1
+// i = 2, fast = node2
+// i = 3, fast = node3
+```
+
+
+
 #### [203. 移除链表元素](https://leetcode.cn/problems/remove-linked-list-elements/)
 
 ```c++
@@ -449,6 +469,8 @@ ListNode* swapPairs(ListNode* head) {
 
 迭代
 
+**交换`temp`后的两个节点**
+
 ![image-20220527161958762](Notes.assets/image-20220527161958762.png)
 
 ```c++
@@ -467,7 +489,7 @@ ListNode* swapPairs(ListNode* head) {
         
         temp = node1;
     }
-    
+	
     return prevHead->next;
 }
 ```
