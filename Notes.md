@@ -1,5 +1,7 @@
 
 
+
+
 ## 搜索算法（BFS，DFS）
 
 ### 邻居
@@ -847,6 +849,430 @@ public:
 ```
 
 #### [剑指 Offer 05. 替换空格](https://leetcode.cn/problems/ti-huan-kong-ge-lcof/)
+
+首先扩充数组到每个空格替换成"%20"之后的大小。
+
+然后从后向前替换空格，也就是双指针法，过程如下：
+
+i指向新长度的末尾，j指向旧长度的末尾。
+
+![image-20220607110318571](Notes.assets/image-20220607110318571.png)
+
+**其实很多数组填充类的问题，都可以先预先给数组扩容带填充后的大小，然后在从后向前进行操作。**
+
+```c++
+class Solution {
+public:
+    string replaceSpace(string s) {
+        int sOldSize = s.size();
+		// count space 
+        int count = 0;
+        for (char c : s) {
+            if (c == ' ') {
+                count++;
+            }
+        }
+        
+        // resize string
+        s.resize(sOldSize + 2*count);
+        int sNewSize = s.size();
+        for (int i = sNewSize - 1, j = sOldSize - 1; j < i; i--, j--) {
+            if (s[j] != ' ') {
+                s[i] = s[j];
+            } else {
+                s[i] = '0';
+                s[i - 1] = '2';
+                s[i - 2] = '%';
+                i -= 2;
+            }
+        }
+        return s;
+    }
+};
+```
+
+#### [151. 颠倒字符串中的单词](https://leetcode.cn/problems/reverse-words-in-a-string/)
+
+
+
+## 栈和队列
+
+#### [232. 用栈实现队列](https://leetcode.cn/problems/implement-queue-using-stacks/)
+
+两个栈，一个输入栈，一个输出栈
+
+在push数据的时候，只要数据放进输入栈就好，**但在pop的时候，操作就复杂一些，输出栈如果为空，就把进栈数据全部导入进来（注意是全部导入）**，再从出栈弹出数据，如果输出栈不为空，则直接从出栈弹出数据就可以了。
+
+最后如何判断队列为空呢？**如果进栈和出栈都为空的话，说明模拟的队列为空了。**
+
+注意peek()可以通过pop()实现
+
+```c++
+int peek() {
+    int res = this->pop(); // 直接使用已有的pop函数
+    stOut.push(res); // 因为pop函数弹出了元素res，所以再添加回去
+    return res;
+}
+```
+
+#### [225. 用队列实现栈](https://leetcode.cn/problems/implement-stack-using-queues/)
+
+**用两个队列que1和que2实现队列的功能，que2其实完全就是一个备份的作用**，把que1最后面的元素以外的元素都备份到que2，然后弹出最后面的元素，再把其他元素从que2导回que1。
+
+```c++
+queue.push(1);        
+queue.push(2);        
+queue.pop();   // 注意弹出的操作       
+queue.push(3);        
+queue.push(4);       
+queue.pop();  // 注意弹出的操作    
+queue.pop();    
+queue.pop();    
+queue.empty(); 
+```
+
+1.   queue.push(1)
+
+queue1: [1]
+
+queue2: []
+
+stack: [1]
+
+2.   queue.push(2)
+
+queue1: [1, 2]
+
+queue2: []
+
+stack: [1, 2]
+
+3.   queue.pop(), 把要弹出来的留在q1，其余的元素放入q2，弹出q1元素，把q2的元素加入q1，并清空q2
+
+queue1: [1, 2] -> [2] -> [] -> [1]
+
+queue2: [] -> [1] -> []
+
+stack: [1, 2] -> [1]
+
+```c++
+class MyStack {
+public:
+    queue<int> que1;
+    queue<int> que2; // 辅助队列，用来备份
+    /** Initialize your data structure here. */
+    MyStack() {
+
+    }
+
+    /** Push element x onto stack. */
+    void push(int x) {
+        que1.push(x);
+    }
+
+    /** Removes the element on top of the stack and returns that element. */
+    int pop() {
+        int size = que1.size();
+        size--;
+        while (size--) { // 将que1 导入que2，但要留下最后一个元素
+            que2.push(que1.front());
+            que1.pop();
+        }
+
+        int result = que1.front(); // 留下的最后一个元素就是要返回的值
+        que1.pop();
+        que1 = que2;            // 再将que2赋值给que1
+        while (!que2.empty()) { // 清空que2
+            que2.pop();
+        }
+        return result;
+    }
+
+    /** Get the top element. */
+    int top() {
+        return que1.back();
+    }
+
+    /** Returns whether the stack is empty. */
+    bool empty() {
+        return que1.empty();
+    }
+};
+```
+
+#### [20. 有效的括号](https://leetcode.cn/problems/valid-parentheses/)
+
+在匹配左括号的时候，右括号先入栈，就只需要比较当前元素和栈顶相不相等就可以了，比左括号先入栈代码实现要简单的多了！
+
+```c++
+class Solution {
+public:
+    bool isValid(string s) {
+        stack<int> st;
+        for (int i = 0; i < s.size(); i++) {
+            if (s[i] == '(') st.push(')');	// add ')'
+            else if (s[i] == '{') st.push('}');
+            else if (s[i] == '[') st.push(']');
+            // 第三种情况：遍历字符串匹配的过程中，栈已经为空了，没有匹配的字符了，说明右括号没有找到对应的左括号 return false
+            // 第二种情况：遍历字符串匹配的过程中，发现栈里没有我们要匹配的字符。所以return false
+            else if (st.empty() || st.top() != s[i]) return false;
+            else st.pop(); // st.top() 与 s[i]相等，栈弹出元素
+        }
+        // 第一种情况：此时我们已经遍历完了字符串，但是栈不为空，说明有相应的左括号没有右括号来匹配，所以return false，否则就return true
+        return st.empty();
+    }
+};		
+```
+
+#### [1047. 删除字符串中的所有相邻重复项](https://leetcode.cn/problems/remove-all-adjacent-duplicates-in-string/)
+
+把字符按顺序添加到栈里，如果添加的元素与栈顶元素相同，则说明是重复元素，把栈顶元素弹出。最后翻转一下字符串即可。
+
+```c++
+class Solution {
+public:
+    string removeDuplicates(string s) {
+        stack<char> st;
+
+        for (char c : s) {
+            if (st.empty() || c != st.top()) {
+                st.push(c);
+            } 
+            else {
+                st.pop(); // s 与 st.top()相等的情况
+            }
+        }
+
+        string res = "";
+        while (!st.empty()) {
+            res += st.top();
+            st.pop();
+        }
+
+        // reverse string res
+        // for (int i = 0, j = res.size()-1; i < res.size()/2; i++, j--) {
+        //     swap(res[i], res[j]);
+        // }
+
+        reverse (res.begin(), res.end());
+
+        return res;        
+    }
+};
+```
+
+
+
+#### [150. 逆波兰表达式求值](https://leetcode.cn/problems/evaluate-reverse-polish-notation/)
+
+注意如何把string转换成int， stoi(s)
+
+```c++
+class Solution {
+public:
+    int evalRPN(vector<string>& tokens) {
+        stack<int> st;
+        for (int i = 0; i < tokens.size(); i++) {
+            if (tokens[i] == "+" || tokens[i] == "-" || tokens[i] == "*" || tokens[i] == "/") {
+                int num1 = st.top();
+                st.pop();
+                int num2 = st.top();
+                st.pop();
+                if (tokens[i] == "+") st.push(num2 + num1);
+                if (tokens[i] == "-") st.push(num2 - num1);
+                if (tokens[i] == "*") st.push(num2 * num1);
+                if (tokens[i] == "/") st.push(num2 / num1);
+            } else {
+                st.push(stoi(tokens[i]));
+            }
+        }
+        int result = st.top();
+        st.pop(); // 把栈里最后一个元素弹出（其实不弹出也没事）
+        return result;
+    }
+};
+```
+
+
+
+#### [239. 滑动窗口最大值](https://leetcode.cn/problems/sliding-window-maximum/)
+
+遍历数组，将 数 存放在双向队列中，并用 L,R 来标记窗口的左边界和右边界。队列中保存的并不是真的 数，而是该数值对应的数组下标位置，并且数组中的数要从大到小排序。如果当前遍历的数比队尾的值大，则需要弹出队尾值，直到队列重新满足从大到小的要求。刚开始遍历时，L 和 R 都为 0，有一个形成窗口的过程，此过程没有最大值，L 不动，R 向右移。当窗口大小形成时，L 和 R 一起向右移，每次移动时，判断队首的值的数组下标是否在 [L,R] 中，如果不在则需要弹出队首的值，当前窗口的最大值即为队首的数。
+
+由于队列中下标对应的元素是严格单调递减的，因此此时队首下标对应的元素就是滑动窗口中的最大值。
+
+```
+输入: nums = [1,3,-1,-3,5,3,6,7], 和 k = 3
+输出: [3,3,5,5,6,7]
+
+解释过程中队列中都是具体的值，方便理解，具体见代码。
+初始状态：L=R=0,队列:{}
+i=0,nums[0]=1。队列为空,直接加入。队列：{1}
+i=1,nums[1]=3。队尾值为1，3>1，弹出队尾值，加入3。队列：{3}
+i=2,nums[2]=-1。队尾值为3，-1<3，直接加入。队列：{3,-1}。此时窗口已经形成，L=0,R=2，result=[3]
+i=3,nums[3]=-3。队尾值为-1，-3<-1，直接加入。队列：{3,-1,-3}。队首3对应的下标为1，L=1,R=3，有效。result=[3,3]
+i=4,nums[4]=5。队尾值为-3，5>-3，依次弹出后加入。队列：{5}。此时L=2,R=4，有效。result=[3,3,5]
+i=5,nums[5]=3。队尾值为5，3<5，直接加入。队列：{5,3}。此时L=3,R=5，有效。result=[3,3,5,5]
+i=6,nums[6]=6。队尾值为3，6>3，依次弹出后加入。队列：{6}。此时L=4,R=6，有效。result=[3,3,5,5,6]
+i=7,nums[7]=7。队尾值为6，7>6，弹出队尾值后加入。队列：{7}。此时L=5,R=7，有效。result=[3,3,5,5,6,7]
+
+```
+
+```c++
+class Solution {
+public:
+    vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+        int n = nums.size();
+        deque<int> q;
+        for (int i = 0; i < k; ++i) {
+            while (!q.empty() && nums[i] >= nums[q.back()]) {
+                q.pop_back();
+            }
+            q.push_back(i);
+        }
+
+        vector<int> ans = {nums[q.front()]};
+        for (int i = k; i < n; ++i) {
+            while (!q.empty() && nums[i] >= nums[q.back()]) {
+                q.pop_back();
+            }
+            q.push_back(i);
+            while (q.front() <= i - k) {
+                q.pop_front();
+            }
+            ans.push_back(nums[q.front()]);
+        }
+        return ans;
+    }
+};
+```
+
+#### [347. 前 K 个高频元素](https://leetcode.cn/problems/top-k-frequent-elements/)
+
+##### 数据结构（优先级队列）
+
+默认为大顶堆
+
+![image-20220607181454831](Notes.assets/image-20220607181454831.png)
+
+![image-20220607181512260](Notes.assets/image-20220607181512260.png)
+
+添加自定义数据结构或者自定义比较方式
+
+```c++
+struct fruit
+{
+	string name;
+	int price;
+};
+```
+
+```c++
+// method 1, overload '<'
+
+// 希望水果价格高为优先级高, 大顶堆
+struct fruit
+{
+	string name;
+	int price;
+	friend bool operator < (fruit f1,fruit f2)
+	{
+		return f1.price < f2.price;
+	}
+};
+
+// 希望水果价格低为优先级高, 小顶堆
+struct fruit
+{
+	string name;
+	int price;
+	friend bool operator < (fruit f1,fruit f2)
+	{
+		return f1.price > f2.price;
+	}
+};
+
+```
+
+```c++
+// method 2, functional
+
+// 希望水果价格高为优先级高, 大顶堆
+struct myComparison
+{
+	bool operator () (fruit f1,fruit f2)
+	{
+		return f1.price < f2.price;
+	}
+};
+
+//此时优先队列的定义应该如下
+priority_queue<fruit,vector<fruit>,myComparison> q;
+
+```
+
+##### unordered_map
+
+```
+typedef pair<const Key, T> value_type;
+```
+
+
+
+##### Code
+
+![image-20220607181007022](Notes.assets/image-20220607181007022.png)
+
+维护一个小顶堆，使堆中的元素个数为k
+
+
+
+```c++
+输入: nums = [1,1,1,2,2,3], k = 2
+输出: [1,2]
+```
+
+```c++
+class Solution {
+public:
+    vector<int> topKFrequent(vector<int>& nums, int k) {
+		// <num, num frequency>
+        unordered_map<int, int> occurrences;	// pair<int, int> = pair<key, value>
+        for (const auto& v : nums) {
+            occurrences[v]++;
+        }
+        
+        // pair 的第一个元素代表数组的值，第二个元素代表了该值出现的次数
+        // 根据出现的次数来进行优先排序(小顶堆)
+        struct myComparison {
+        	bool operator() (const pair<int, int>& lhs, const pair<int, int>& rhs) const {
+                return lhs.second > rhs.second; //小顶堆是大于号 
+            }  
+        };
+        
+        priority_queue<pair<int, int>, vector<pair<int, int>>, myComparison> pq;
+        
+        for (const auto& elem : occurrences) {
+            pq.push(elem);
+            // 如果堆的大小大于了K，则队列弹出，保证堆的大小一直为k
+            if (pq.size() > k) {
+                pq.pop();
+            }
+        }
+        
+        vector<int> res;
+        while (!pq.empty()) {
+            auto top = pq.top();	// <num, num freq>
+            res.push_back(top.first);
+            pq.pop();
+        }
+        
+        return res;          
+    }
+};
+```
+
+
 
 
 
